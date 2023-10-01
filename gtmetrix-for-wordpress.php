@@ -293,8 +293,7 @@ class GTmetrix_For_WordPress {
                         }
 
                         if ( !empty( $email_content ) ) {
-                            $message_date = date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) );
-                            $settings = admin_url() . 'admin.php?page=gfw_schedule';
+							$report_url = $report['report_url'] ?? '';
 
                             $message = <<<HERE
 <table width="100%" cellpadding="10" cellspacing="0" bgcolor="#ececec">
@@ -316,16 +315,11 @@ class GTmetrix_For_WordPress {
                         <table width="510" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="font-size:12px;" >
                             <tr>
                                 <td valign="top">
-                                    <img src="{$report['report_url']}/screenshot.jpg" style="margin-right: 10px;" />
-                                </td>
-                                <td valign="top">
-                                    <p><span style="font-size:12px; color:#666666; font-style:italic">{$parameters['gfw_url']}</span></p>
-                                    <p>$message_date</p>
                                     <hr style="border:0; border-top:1px solid #d7d7d7; height: 0;" />
 HERE;
                             $message .= implode( $email_content );
+							$message .= sprintf( '<p><a href="%s">View detailed report</a></p>', $report_url );
                             $message .= <<<HERE
-                                <p><a href="{$report['report_url']}">View detailed report</a></p>
                                 </td>
                                 </tr>
                         </table>
@@ -334,7 +328,7 @@ HERE;
                 <tr>
                     <td>
                         <hr style="border:0; border-top:1px solid #d7d7d7; height: 0;" />
-                        <p style="font-size:11px; color:#8a8a8a; line-height:100%;">This email was sent to you by the GTmetrix for WordPress plugin. You can opt out of further alerts by modifying the plugin's <a href="$settings">settings</a> on your WordPress installation.</p>
+                        <p style="font-size:11px; color:#8a8a8a; line-height:100%;">This email was sent to you by the GTmetrix for WordPress plugin. You can opt out of further alerts by modifying the plugin's settings on your WordPress installation.</p>
                     </td>
                 </tr>
                 <tr>
@@ -349,7 +343,9 @@ HERE;
 </table>
 HERE;
                             $options = get_option( 'gfw_options' );
-                            add_filter( 'wp_mail_content_type', create_function( '', 'return "text/html";' ) );
+                            add_filter( 'wp_mail_content_type', function() {
+								return "text/html";
+							} );
                             wp_mail( 'admin_email' == $options['notifications_email'] ? get_option( 'admin_email' ) : $options['api_username'], 'GTmetrix for WordPress notification from ' . get_home_url( null, '', 'http' ), $message );
                         }
                     }
