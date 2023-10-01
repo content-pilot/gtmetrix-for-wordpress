@@ -3,7 +3,7 @@
   Plugin Name: GTmetrix for WordPress
   Plugin URI: https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html
   Description: GTmetrix can help you develop a faster, more efficient, and all-around improved website experience for your users. Your users will love you for it.
-  Version: 0.4.9.1
+  Version: 0.4.9.3
   Author: GTmetrix
   Author URI: https://gtmetrix.com/
 
@@ -55,7 +55,7 @@ class GTmetrix_For_WordPress {
 
         $options = get_option( 'gfw_options' );
         define( 'GFW_WP_VERSION', '3.3.1' );
-        define( 'GFW_VERSION', '0.4.9' );
+        define( 'GFW_VERSION', '0.4.9.3' );
         define( 'GFW_USER_AGENT', 'GTmetrix_WordPress/' . GFW_VERSION . ' (+https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html)' );
         define( 'GFW_TIMEZONE', get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : date_default_timezone_get() );
         define( 'GFW_AUTHORIZED', isset( $options['authorized'] ) && $options['authorized'] ? true : false );
@@ -395,7 +395,7 @@ HERE;
         /*
          * Moved from plugin activation hook
          */
-        $options = get_option( 'gfw_options' );
+        $options = get_option( 'gfw_options', [] );
         $options['widget_pagespeed'] = isset( $options['widget_pagespeed'] ) ? $options['widget_pagespeed'] : 1;
         $options['widget_yslow'] = isset( $options['widget_yslow'] ) ? $options['widget_yslow'] : 1;
         $options['widget_scores'] = isset( $options['widget_scores'] ) ? $options['widget_scores'] : 1;
@@ -405,7 +405,7 @@ HERE;
         $options['clear_settings'] = isset( $options['clear_settings'] ) ? $options['clear_settings'] : 0;
         $options['clear_records'] = isset( $options['clear_records'] ) ? $options['clear_records'] : 0;
         update_option( 'gfw_options', $options );
-        $options = get_option( 'gfw_account' );
+        $options = get_option( 'gfw_account', [] );
         $options['account_type'] = 'Basic';
         /*
          * 
