@@ -23,25 +23,9 @@ Set up some WordPress furnishings
     background: url(images/icon32.png) no-repeat 0 0;
 }
 
-#poststuff .inside {
-  margin: 15px;
-  padding: 0;
-}
-
 /*------------------------------------------------------------------------------
 Typography
 ------------------------------------------------------------------------------*/
-.postbox {
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-
-}
-
-#poststuff h2 {
-  font-family: Arial, sans-serif;
-  font-size: 18px;
-  color: #1d2327;
-}
 
 .gfw h2 {
   font-family: Arial, sans-serif;
