@@ -3,7 +3,7 @@
   Plugin Name: GTmetrix for WordPress
   Plugin URI: https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html
   Description: GTmetrix can help you develop a faster, more efficient, and all-around improved website experience for your users. Your users will love you for it.
-  Version: 0.4.9.5
+  Version: 0.4.9.6
   Author: GTmetrix
   Author URI: https://gtmetrix.com/
   Update URI: false
@@ -37,11 +37,8 @@ class GTmetrix_For_WordPress {
         add_action( 'init', array( &$this, 'register_post_types' ) );
         add_action( 'admin_init', array( &$this, 'register_settings' ) );
         add_action( 'admin_init', array( &$this, 'set_schedules_and_perms' ) );
-        add_action( 'admin_init', array( &$this, 'system_check' ), 0 );
         add_action( 'admin_menu', array( &$this, 'add_menu_items' ) );
         add_action( 'admin_print_styles', array( &$this, 'admin_styles' ) );
-        add_action( 'admin_notices', array( &$this, 'admin_notices' ) );
-        add_action( 'admin_bar_menu', array( &$this, 'add_to_toolbar' ), 999 );
         add_action( 'wp_dashboard_setup', array( &$this, 'add_dashboard_widget' ) );
         add_action( 'gfw_hourly_event', array( &$this, 'scheduled_events' ) );
         add_action( 'gfw_daily_event', array( &$this, 'scheduled_events' ) );
@@ -56,11 +53,10 @@ class GTmetrix_For_WordPress {
         add_action( 'widgets_init', array( &$this, 'gfw_widget_init' ) );
         add_action( 'plugins_loaded', array( &$this, 'gwf_plugins_loaded' ) );
         add_filter( 'cron_schedules', array( &$this, 'add_intervals' ) );
-        add_filter( 'plugin_row_meta', array( &$this, 'plugin_links' ), 10, 2 );
 
         $options = get_option( 'gfw_options' );
         define( 'GFW_WP_VERSION', '3.3.1' );
-        define( 'GFW_VERSION', '0.4.9.5' );
+        define( 'GFW_VERSION', '0.4.9.6' );
         define( 'GFW_USER_AGENT', 'GTmetrix_WordPress/' . GFW_VERSION . ' (+https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html)' );
         define( 'GFW_TIMEZONE', get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : date_default_timezone_get() );
         define( 'GFW_AUTHORIZED', isset( $options['authorized'] ) && $options['authorized'] ? true : false );
@@ -71,22 +67,6 @@ class GTmetrix_For_WordPress {
         define( 'GFW_TRIES', 3 );
         define( 'GFW_FRONT', isset( $options['front_url'] ) && 'site' == $options['front_url'] ? get_home_url( null, '' ) : get_site_url( null, '' ) );
         define( 'GFW_GA_CAMPAIGN', '?utm_source=wordpress&utm_medium=GTmetrix-v' . GFW_VERSION . '&utm_campaign=' . urlencode(get_option('blogname')) );
-    }
-
-    public function add_to_toolbar( $wp_admin_bar ) {
-        $options = get_option( 'gfw_options' );
-        if ( GFW_AUTHORIZED && !is_admin() && current_user_can( 'access_gtmetrix' ) && isset( $options['toolbar_link'] ) && $options['toolbar_link'] ) {
-            $wp_admin_bar->add_node( array(
-                'id' => 'gfw',
-                'title' => 'GTmetrix',
-            ) );
-            $wp_admin_bar->add_menu( array(
-                'parent' => 'gfw',
-                'id' => 'gfw-test',
-                'title' => 'Test this page',
-                'href' => GFW_TESTS . '&url=' . $_SERVER['REQUEST_URI']
-            ) );
-        }
     }
 
     /*
@@ -101,29 +81,6 @@ class GTmetrix_For_WordPress {
         wp_clear_scheduled_hook( 'gfw_weekly_event', array( 'weekly' ) );
         wp_clear_scheduled_hook( 'gfw_monthly_event', array( 'monthly' ) );
         
-    }
-
-    public function system_check() {
-        global $wp_version;
-        $plugin = plugin_basename( __FILE__ );
-        if ( is_plugin_active( $plugin ) ) {
-            if ( version_compare( $wp_version, GFW_WP_VERSION, '<' ) ) {
-                $message = '<p>GTmetrix for WordPress requires WordPress ' . GFW_WP_VERSION . ' or higher. ';
-            } elseif ( !function_exists( 'curl_init' ) ) {
-                $message = '<p>GTmetrix for WordPress requires cURL to be enabled. ';
-            }
-            if ( isset( $message ) ) {
-                deactivate_plugins( $plugin );
-                wp_die( $message . 'Deactivating Plugin.</p><p>Back to <a href="' . admin_url() . '">WordPress admin</a>.</p>' );
-            }
-        }
-    }
-
-    public function plugin_links( $links, $file ) {
-        if ( $file == plugin_basename( __FILE__ ) ) {
-            return array_merge( $links, array( sprintf( '<a href="%1$s">%2$s</a>', GFW_SETTINGS, 'Settings' ) ) );
-        }
-        return $links;
     }
 
     public function add_intervals( $schedules ) {
@@ -382,18 +339,6 @@ HERE;
             $this->settings_page_hook = add_menu_page( 'GTmetrix', 'GTmetrix', 'access_gtmetrix', 'gfw_settings', array( $this, 'settings_page' ), 'none' );
         }
         add_action( 'load-' . $this->settings_page_hook, array( &$this, 'page_loading' ) );
-    }
-
-    public function admin_notices() {
-        if ( !GFW_AUTHORIZED ) {
-            echo $this->set_notice( '<strong>GTmetrix for WordPress is almost ready.</strong> You must <a href="' . GFW_SETTINGS . '">enter your GTmetrix API key</a> for it to work.' );
-        }
-
-        $notice = get_transient( 'admin_notice' );
-        if ( $notice ) {
-            echo $this->set_notice( $notice );
-            delete_transient( 'admin_notice' );
-        }
     }
 
     public function register_settings() {
@@ -1507,8 +1452,10 @@ HERE;
                 require_once('lib/Services_WTF_Test_2.php');
             }
             $test = new Services_WTF_Test_v2();
-            $test->api_username( $options['api_username'] );
-            $test->api_password( $options['api_key'] );
+			$username = $options['api_username'] ?? '';
+			$api_key = $options['api_key'] ?? '';
+            $test->api_username( $username );
+            $test->api_password( $api_key );
             $test->user_agent( GFW_USER_AGENT );
             $status = $test->status();
             if ( $test->error() ) {
@@ -1551,8 +1498,10 @@ HERE;
             require_once('lib/Services_WTF_Test_2.php');
         }
         $api = new Services_WTF_Test_v2();
-        $api->api_username( $options['api_username'] );
-        $api->api_password( $options['api_key'] );
+		$username = $options['api_username'] ?? '';
+		$api_key = $options['api_key'] ?? '';
+		$api->api_username( $username );
+		$api->api_password( $api_key );
         $api->user_agent( GFW_USER_AGENT );
         return $api;
     }
@@ -2865,8 +2814,10 @@ HERE;
                 )
             );
             $test_v2 = new Services_WTF_Test_v2();
-            $test_v2->api_username( $options['api_username'] );
-            $test_v2->api_password( $options['api_key'] );
+			$username = $options['api_username'] ?? '';
+			$api_key = $options['api_key'] ?? '';
+            $test_v2->api_username( $username );
+            $test_v2->api_password( $api_key );
             $status_v2 = $test_v2->status();
             /*
              * We need to re-retrieve the status, which contains 

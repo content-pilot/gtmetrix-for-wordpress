@@ -1108,13 +1108,6 @@ Schedule - Reports table
 /*------------------------------------------------------------------------------
 Sidebar
 ------------------------------------------------------------------------------*/
-.postbox {
-	border: 4px solid #e0e0e0;
-}
-
-.postbox .inside p {
-	font-size: 14px;
-}
 
 #gfw-optimization-meta-box .account-type {
 	font-weight: bold;
