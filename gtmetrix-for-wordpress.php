@@ -3,7 +3,7 @@
   Plugin Name: GTmetrix for WordPress
   Plugin URI: https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html
   Description: GTmetrix can help you develop a faster, more efficient, and all-around improved website experience for your users. Your users will love you for it.
-  Version: 0.4.9.6
+  Version: 0.4.9.7
   Author: GTmetrix
   Author URI: https://gtmetrix.com/
   Update URI: false
@@ -56,7 +56,7 @@ class GTmetrix_For_WordPress {
 
         $options = get_option( 'gfw_options' );
         define( 'GFW_WP_VERSION', '3.3.1' );
-        define( 'GFW_VERSION', '0.4.9.6' );
+        define( 'GFW_VERSION', '0.4.9.7' );
         define( 'GFW_USER_AGENT', 'GTmetrix_WordPress/' . GFW_VERSION . ' (+https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html)' );
         define( 'GFW_TIMEZONE', get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : date_default_timezone_get() );
         define( 'GFW_AUTHORIZED', isset( $options['authorized'] ) && $options['authorized'] ? true : false );
@@ -222,7 +222,6 @@ class GTmetrix_For_WordPress {
                                     }
                                 }
                             }
-                            //error_log( "EMAIL CONTENT " . print_r( $email_content, TRUE ));
                             /*
                             switch ( $key ) {
                                 //note that we
@@ -661,7 +660,6 @@ HERE;
 
         if ( 'POST' == $_SERVER['REQUEST_METHOD'] ) {
             $data = $_POST;
-            //error_log( 'schedule_page ' . print_r( $data, TRUE));
             if ( $data['report_id'] ) {
 
                 $custom_fields = get_post_custom( $data['report_id'] );
@@ -971,7 +969,6 @@ HERE;
                     );
                     foreach ( $locations['data'] as $location ) {
                         $location_region = $location['attributes']['region'];
-                        //error_log($location_region);
                         if( $status_options['account_pro_locations_access'] ) {
                             //we've got access to all locations. Group them by region
                             $valid['locations'][$location_region][$location['id']] = $location;
@@ -1203,7 +1200,6 @@ HERE;
         $api = $this->api();
         $response = array( );
         delete_transient( 'credit_status' );
-        error_log( 'run_test parameters ' . print_r( $parameters, TRUE ) );
         $test_id = $api->test( array(
             'url' => $this->append_http( $parameters['gfw_url'] ),
             'browser' => $parameters['gfw_browser'],
@@ -1220,7 +1216,6 @@ HERE;
         );
 
         if ( $api->error() ) {
-            error_log($api->error());
             $response['error'] = $api->error();
             return $response;
         }
@@ -1234,7 +1229,6 @@ HERE;
 
         if ( $api->completed() ) {
             $response['test_id'] = $test_id;
-            error_log( "API RESULTS " . print_r( $api->results(), TRUE ) );
             return array_merge( $response, $api->results() );
         }
     }
@@ -1466,7 +1460,6 @@ HERE;
                 */
             } else {
                 $status_options = $status['data']['attributes'];
-                //error_log( "STATUS OPTIONS " . print_r( $status_options, TRUE ));
                 update_option( 'gfw_status', $status_options );              
             }
         }
@@ -1665,7 +1658,6 @@ HERE;
             while ( $query->have_posts() ) {
                 $query->next_post();
                 $custom_fields = get_post_custom( $query->post->ID );
-                //error_log( print_r($custom_fields, TRUE));
                 $expired = true;
                 if ( $this->gtmetrix_file_exists( $custom_fields['report_url'][0] . '/screenshot.jpg' ) ) {
                     $expired = false;
@@ -2413,7 +2405,6 @@ HERE;
                             foreach ( $custom_fields as $name => $value ) {
                                 $$name = $value[0];
                             }
-                            //error_log( print_r( $custom_fields, TRUE ));
                             if ( !isset( $gtmetrix_error ) ) {
                                 if( isset( $performance_score )) {
                                     $performance_grade = $this->score_to_grade( $performance_score );
