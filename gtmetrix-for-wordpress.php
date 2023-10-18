@@ -3,7 +3,7 @@
   Plugin Name: GTmetrix for WordPress
   Plugin URI: https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html
   Description: GTmetrix can help you develop a faster, more efficient, and all-around improved website experience for your users. Your users will love you for it.
-  Version: 0.4.9.7
+  Version: 0.4.9.8
   Author: GTmetrix
   Author URI: https://gtmetrix.com/
   Update URI: false
@@ -56,7 +56,7 @@ class GTmetrix_For_WordPress {
 
         $options = get_option( 'gfw_options' );
         define( 'GFW_WP_VERSION', '3.3.1' );
-        define( 'GFW_VERSION', '0.4.9.7' );
+        define( 'GFW_VERSION', '0.4.9.8' );
         define( 'GFW_USER_AGENT', 'GTmetrix_WordPress/' . GFW_VERSION . ' (+https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html)' );
         define( 'GFW_TIMEZONE', get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : date_default_timezone_get() );
         define( 'GFW_AUTHORIZED', isset( $options['authorized'] ) && $options['authorized'] ? true : false );
@@ -2818,14 +2818,14 @@ HERE;
                 $status_options = $status_v2['data']['attributes'];
                 update_option( 'gfw_status', $status_options );
             } else {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } 
             /*
              * Retrieve locations
              */
             $locations = $test_v2->locations();
             if ( $test_v2->error() ) {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } else {
                 if( isset( $locations['data'] ) ) {
                     $options['locations'] = [];
@@ -2855,7 +2855,7 @@ HERE;
             }
             $browsers = $test_v2->browsers();
             if ( $test_v2->error() ) {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } else {
                 if( isset( $browsers['data'] ) ) {
                     $options['browsers'] = [];
