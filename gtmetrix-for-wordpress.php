@@ -37,7 +37,7 @@ class GTmetrix_For_WordPress {
         add_action( 'admin_init', array( &$this, 'register_settings' ) );
         add_action( 'admin_init', array( &$this, 'set_schedules_and_perms' ) );
         add_action( 'admin_menu', array( &$this, 'add_menu_items' ) );
-        // add_action( 'admin_print_styles', array( &$this, 'admin_styles' ) );
+        add_action( 'admin_print_styles', array( &$this, 'admin_styles' ) );
         add_action( 'wp_dashboard_setup', array( &$this, 'add_dashboard_widget' ) );
         add_action( 'gfw_hourly_event', array( &$this, 'scheduled_events' ) );
         add_action( 'gfw_daily_event', array( &$this, 'scheduled_events' ) );
