@@ -169,12 +169,11 @@ class Services_WTF_Test {
             $this->result = array( );
 
         $data = http_build_query( $data );
-        error_log($data);
+
         $result = $this->query( 'test', 'POST', $data );
 
         if ( $result != false ) {
             $result = json_decode( $result, true );
-            error_log(print_r($result, TRUE));
             if ( empty( $result['error'] ) ) {
                 $this->test_id = $result['test_id'];
 

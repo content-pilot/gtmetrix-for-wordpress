@@ -75,7 +75,6 @@ class Services_WTF_Test_v2 {
      * returns raw http data (JSON object in most API cases) on success, false otherwise
      */
     protected function query( $command, $req = 'GET', $params = '' ) {
-        error_log('COMMAND ' . $command );
         $ch = curl_init();
 
         if ( substr( $command, 0, strlen( self::api_url ) - 1 ) == self::api_url ) {
@@ -83,7 +82,6 @@ class Services_WTF_Test_v2 {
         } else {
             $URL = self::api_url . '/' . $command;
         }
-        //error_log('URL ' . $URL );
         
         curl_setopt( $ch, CURLOPT_URL, $URL );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
@@ -96,7 +94,6 @@ class Services_WTF_Test_v2 {
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         if ( $req == 'POST' ) {
             $params = json_encode( $params );
-            //error_log('PARAMS ' . print_r($params, TRUE));
             curl_setopt( $ch, CURLOPT_POST, true );
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $params );
             curl_setopt( $ch, CURLOPT_HTTPHEADER, ['Content-Type:application/vnd.api+json'] );
@@ -107,8 +104,6 @@ class Services_WTF_Test_v2 {
         $results = curl_exec( $ch );
         if ( $results === false ) {
             $this->error = curl_error( $ch );
-        } else {
-            error_log(curl_getinfo( $ch, CURLINFO_HEADER_OUT));
         }
         curl_close( $ch );
 
@@ -116,9 +111,7 @@ class Services_WTF_Test_v2 {
     }
 
     protected function checkid() {
-        error_log( 'checkid' );
         if ( empty( $this->test_id ) ) {
-            error_log( 'current error message: ' . $this->error );
             $this->error = 'No test_id! Please start a new test or load an existing test first.';
             return false;
         }
@@ -145,7 +138,6 @@ class Services_WTF_Test_v2 {
      * returns the test_id on success, false otherwise;
      */
     public function test( $data ) {
-        error_log('V2.0 test: ' . print_r($data, TRUE ) );
         if ( empty( $data ) ) {
             $this->error = 'Parameters need to be set to start a new test!';
             return false;
@@ -174,15 +166,9 @@ class Services_WTF_Test_v2 {
                 'attributes' => $data
             )
         );
-        //$post_data = http_build_query( $post_data );
-        //error_log('V2.0 test string data: ' . $post_data );
-        //$headers = array(
-        //    'Content-Type' => 'application/vnd.api+json'
-        //);
         $result = $this->query( 'tests', 'POST', $post_data );
         if ( $result != false ) {
             $result = json_decode( $result, true );
-            error_log( "RESULT " . print_r( $result, TRUE ) );
             if ( empty( $result['errors'] ) ) {
                 $this->test_id = $result['data']['id'];
 
@@ -274,11 +260,9 @@ class Services_WTF_Test_v2 {
         }
 
         $command = "tests/" . $this->test_id;
-        //error_log( $command );
         $result = $this->query( $command );
         if ( $result != false ) {
             $result = json_decode( $result, true );
-            //error_log('poll_state RESULT ' . print_r($result, TRUE ) );
             if ( !empty( $result['error'] ) AND !isset( $result['data']['attributes']['state'] ) ) {
                 $this->error = $result['error'];
                 return false;

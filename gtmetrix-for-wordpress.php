@@ -2818,14 +2818,14 @@ HERE;
                 $status_options = $status_v2['data']['attributes'];
                 update_option( 'gfw_status', $status_options );
             } else {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } 
             /*
              * Retrieve locations
              */
             $locations = $test_v2->locations();
             if ( $test_v2->error() ) {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } else {
                 if( isset( $locations['data'] ) ) {
                     $options['locations'] = [];
@@ -2855,7 +2855,7 @@ HERE;
             }
             $browsers = $test_v2->browsers();
             if ( $test_v2->error() ) {
-                error_log($test_v2->error() );
+                // error_log($test_v2->error() );
             } else {
                 if( isset( $browsers['data'] ) ) {
                     $options['browsers'] = [];
