@@ -3,7 +3,7 @@
   Plugin Name: GTmetrix for WordPress
   Plugin URI: https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html
   Description: GTmetrix can help you develop a faster, more efficient, and all-around improved website experience for your users. Your users will love you for it.
-  Version: 0.4.9.6
+  Version: 0.4.10
   Author: GTmetrix
   Author URI: https://gtmetrix.com/
   Update URI: false
@@ -32,13 +32,12 @@ class GTmetrix_For_WordPress {
 
         include_once(dirname( __FILE__ ) . '/widget.php');
 
-        register_activation_hook( __FILE__, array( &$this, 'activate' ) );
         register_deactivation_hook( __FILE__, array( &$this, 'deactivate' ) );
         add_action( 'init', array( &$this, 'register_post_types' ) );
         add_action( 'admin_init', array( &$this, 'register_settings' ) );
         add_action( 'admin_init', array( &$this, 'set_schedules_and_perms' ) );
         add_action( 'admin_menu', array( &$this, 'add_menu_items' ) );
-        add_action( 'admin_print_styles', array( &$this, 'admin_styles' ) );
+        // add_action( 'admin_print_styles', array( &$this, 'admin_styles' ) );
         add_action( 'wp_dashboard_setup', array( &$this, 'add_dashboard_widget' ) );
         add_action( 'gfw_hourly_event', array( &$this, 'scheduled_events' ) );
         add_action( 'gfw_daily_event', array( &$this, 'scheduled_events' ) );
@@ -56,7 +55,7 @@ class GTmetrix_For_WordPress {
 
         $options = get_option( 'gfw_options' );
         define( 'GFW_WP_VERSION', '3.3.1' );
-        define( 'GFW_VERSION', '0.4.9.6' );
+        define( 'GFW_VERSION', '0.4.10' );
         define( 'GFW_USER_AGENT', 'GTmetrix_WordPress/' . GFW_VERSION . ' (+https://gtmetrix.com/gtmetrix-for-wordpress-plugin.html)' );
         define( 'GFW_TIMEZONE', get_option( 'timezone_string' ) ? get_option( 'timezone_string' ) : date_default_timezone_get() );
         define( 'GFW_AUTHORIZED', isset( $options['authorized'] ) && $options['authorized'] ? true : false );
@@ -66,21 +65,13 @@ class GTmetrix_For_WordPress {
         define( 'GFW_SCHEDULE', get_admin_url() . 'admin.php?page=gfw_schedule' );
         define( 'GFW_TRIES', 3 );
         define( 'GFW_FRONT', isset( $options['front_url'] ) && 'site' == $options['front_url'] ? get_home_url( null, '' ) : get_site_url( null, '' ) );
-        define( 'GFW_GA_CAMPAIGN', '?utm_source=wordpress&utm_medium=GTmetrix-v' . GFW_VERSION . '&utm_campaign=' . urlencode(get_option('blogname')) );
-    }
-
-    /*
-     * Removed logic from this function. It's all called from the admin_init hook now to work around Composer not running the install logic.
-     */
-    public function activate() {
     }
 
     public function deactivate() {
         wp_clear_scheduled_hook( 'gfw_hourly_event', array( 'hourly' ) );
         wp_clear_scheduled_hook( 'gfw_daily_event', array( 'daily' ) );
         wp_clear_scheduled_hook( 'gfw_weekly_event', array( 'weekly' ) );
-        wp_clear_scheduled_hook( 'gfw_monthly_event', array( 'monthly' ) );
-        
+        wp_clear_scheduled_hook( 'gfw_monthly_event', array( 'monthly' ) );   
     }
 
     public function add_intervals( $schedules ) {
@@ -222,37 +213,7 @@ class GTmetrix_For_WordPress {
                                     }
                                 }
                             }
-                            //error_log( "EMAIL CONTENT " . print_r( $email_content, TRUE ));
-                            /*
-                            switch ( $key ) {
-                                //note that we
-                                case 'pagespeed_score':
-                                    if ( $report[$key] < $value ) {
-                                        $pagespeed_grade_condition = $this->score_to_grade( $value );
-                                        $pagespeed_grade = $this->score_to_grade( $report[$key] );
-                                        $email_content[] = '<p>The PageSpeed grade has fallen below ' . $pagespeed_grade_condition['grade'] . '.</p><p><span style="font-size:12px; color:#666666; font-style:italic">The URL is currently scoring ' . $pagespeed_grade['grade'] . ' (' . $report[$key] . '%).</p>';
-                                    }
-                                    break;
-                                case 'yslow_score':
-                                    if ( $report[$key] < $value ) {
-                                        $yslow_grade_condition = $this->score_to_grade( $value );
-                                        $yslow_grade = $this->score_to_grade( $report[$key] );
-                                        $email_content[] = '<p>The YSlow grade has fallen below ' . $yslow_grade_condition['grade'] . '.</p><p><span style="font-size:12px; color:#666666; font-style:italic">The URL is currently scoring ' . $yslow_grade['grade'] . ' (' . $report[$key] . '%).</p>';
-                                    }
-                                    break;
-                                case 'page_load_time':
-                                    if ( $report[$key] > $value ) {
-                                        $email_content[] = '<p>The total page load time has climbed above  ' . $value / 1000 . ' seconds.</p><p><span style="font-size:12px; color:#666666; font-style:italic">The URL is currently taking ' . number_format( (( int ) $report[$key]) / 1000, 2 ) . ' seconds.</p>';
-                                    }
-                                    break;
-                                case 'page_bytes':
-                                    if ( $report[$key] > $value ) {
-                                        $email_content[] = '<p>The total page size has climbed above  ' . size_format( $value, 2 ) . '.</p><p><span style="font-size:12px; color:#666666; font-style:italic">The URL is currently ' . size_format( $report[$key], 2 ) . '.</p>';
-                                    }
-                                    break;
-                            }
-                            */
-                        }
+                           }
 
                         if ( !empty( $email_content ) ) {
 							$report_url = $report['report_url'] ?? '';
@@ -368,7 +329,6 @@ HERE;
             add_settings_field( 'sync', 'Account Sync', array( &$this, 'set_sync' ), 'gfw_settings', 'authentication_section' );
             add_settings_section( 'options_section', '', array( &$this, 'section_text' ), 'gfw_settings' );
             add_settings_field( 'dashboard_widget', 'Show Dashboard widget', array( &$this, 'set_dashboard_widget' ), 'gfw_settings', 'options_section' );
-            add_settings_field( 'toolbar_link', 'Show "GTmetrix" on Admin Toolbar', array( &$this, 'set_toolbar_link' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'notifications_email', 'E-mail to send Alerts to', array( &$this, 'set_notifications_email' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'front_url', 'Front page URL', array( &$this, 'set_front_url' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'report_type', 'Report Type', array( &$this, 'set_report_type' ), 'gfw_settings', 'options_section' );
@@ -377,11 +337,7 @@ HERE;
             add_settings_field( 'default_location', 'Default location', array( &$this, 'set_default_location' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'default_connection', 'Default connection', array( &$this, 'set_default_connection' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'default_retention', 'Default data retention', array( &$this, 'set_default_retention' ), 'gfw_settings', 'options_section' );
-            //add_settings_field( 'clear_settings', 'Clear settings on uninstall', array( &$this, 'set_clear_settings' ), 'gfw_settings', 'options_section' );
-            //add_settings_field( 'clear_records', 'Clear records on uninstall', array( &$this, 'set_clear_records' ), 'gfw_settings', 'options_section' );
             add_settings_section( 'reset_section', '', array( &$this, 'section_text' ), 'gfw_settings' );
-            add_settings_field( 'default_adblock', 'Default Adblock status', array( &$this, 'set_default_adblock' ), 'gfw_settings', 'options_section' );
-            add_settings_field( 'default_enable_video', 'Default enable video', array( &$this, 'set_default_enable_video' ), 'gfw_settings', 'options_section' );
             add_settings_field( 'reset', 'Flush plugin data from WordPress database', array( &$this, 'set_reset' ), 'gfw_settings', 'reset_section' );
         }
     }
@@ -500,28 +456,6 @@ HERE;
         echo '<input type="checkbox" name="gfw_options[dashboard_widget]" id="dashboard_widget" value="1" ' . checked( $options['dashboard_widget'], 1, false ) . ' /><label for="dashboard_widget"></label></span> <span class="description">Show latest front page GTmetrix results on WordPress dashboard pages</p>';
     }
 
-    public function set_toolbar_link() {
-        $options = get_option( 'gfw_options' );
-        $options['toolbar_link'] = isset( $options['toolbar_link'] ) ? $options['toolbar_link'] : 0;
-        echo '<input type="hidden" name="gfw_options[toolbar_link]" value="0" />';
-        echo '<span class="input-toggle">';
-        echo '<input type="checkbox" name="gfw_options[toolbar_link]" id="toolbar_link" value="1" ' . checked( $options['toolbar_link'], 1, false ) . ' /><label for="toolbar_link"></label></span> <span class="description">Test pages when logged in as admin from your WordPress Admin Toolbar</p>';
-    }
-
-    public function set_default_adblock() {
-        $options = get_option( 'gfw_options' );
-        echo '<input type="hidden" name="gfw_options[default_adblock]" value="0" />';
-        echo '<span class="input-toggle">';
-        echo '<input type="checkbox" name="gfw_options[default_adblock]" id="default_adblock" value="1" ' . checked( $options['default_adblock'], 1, false ) . ' /><label for="default_adblock"></label></span> <span class="description">Turning on AdBlock can help you see the difference Ad networks make on your blog</span>';
-    }
-
-    public function set_default_enable_video() {
-        $options = get_option( 'gfw_options' );
-        echo '<input type="hidden" name="gfw_options[default_enable_video]" value="0" />';
-        echo '<span class="input-toggle">';
-        echo '<input type="checkbox" name="gfw_options[default_enable_video]" id="default_enable_video" value="1" ' . checked( $options['default_enable_video'], 1, false ) . ' /><label for="default_enable_video"></label></span> <span class="description">Enable video creation of page load by default</span>';
-    }
-
     public function set_front_url() {
         $options = get_option( 'gfw_options' );
         echo '<p><select name="gfw_options[front_url]" id="front_url">';
@@ -562,92 +496,9 @@ HERE;
         wp_localize_script( 'gfw-script', 'gfwObject', array( 'gfwnonce' => wp_create_nonce( 'gfwnonce' ) ) );
         $gfw_status = get_option( 'gfw_status', array() );
         if ( GFW_AUTHORIZED ) {
-            //add_meta_box( 'gfw-credits-meta-box', 'API Credits OBSOLETE', array( &$this, 'credits_meta_box' ), $this->tests_page_hook, 'side', 'core' );
-            //add_meta_box( 'gfw-credits-meta-box', 'API Credits OBSOLETE', array( &$this, 'credits_meta_box' ), $this->schedule_page_hook, 'side', 'core' );
-            //add_meta_box( 'gfw-api-meta-box', 'New API OBSOLETE', array( &$this, 'api_meta_box' ), $this->tests_page_hook, 'side', 'high' );
-            if( $gfw_status['account_type'] == 'Basic' ) {
-                add_meta_box( 'gfw-upgrade-box', 'Upgrade to GTmetrix Pro', array( &$this, 'upgrade_meta_box' ), $this->tests_page_hook, 'side', 'high' );
-                add_meta_box( 'gfw-upgrade-box', 'Upgrade to GTmetrix Pro', array( &$this, 'upgrade_meta_box' ), $this->settings_page_hook, 'side', 'core' );
-                add_meta_box( 'gfw-upgrade-box', 'Upgrade to GTmetrix Pro', array( &$this, 'upgrade_meta_box' ), $this->schedule_page_hook, 'side', 'core' );
-            }
             add_meta_box( 'gfw-optimization-meta-box', 'GTmetrix Account', array( &$this, 'gtmetrix_account_meta_box' ), $this->tests_page_hook, 'side', 'core' );
             add_meta_box( 'gfw-optimization-meta-box', 'GTmetrix Account', array( &$this, 'gtmetrix_account_meta_box' ), $this->schedule_page_hook, 'side', 'core' );
             add_meta_box( 'gfw-optimization-meta-box', 'GTmetrix Account', array( &$this, 'gtmetrix_account_meta_box' ), $this->settings_page_hook, 'side', 'core' );
-            add_meta_box( 'gfw-optimization-meta-box', 'Need optimization help?', array( &$this, 'optimization_meta_box' ), $this->tests_page_hook, 'side', 'core' );
-            add_meta_box( 'gfw-optimization-meta-box', 'Need optimization help?', array( &$this, 'optimization_meta_box' ), $this->schedule_page_hook, 'side', 'core' );
-            add_meta_box( 'gfw-news-meta-box', 'Latest News', array( &$this, 'news_meta_box' ), $this->tests_page_hook, 'side', 'core' );
-            add_meta_box( 'gfw-news-meta-box', 'Latest News', array( &$this, 'news_meta_box' ), $this->schedule_page_hook, 'side', 'core' );
-        }
-        add_meta_box( 'gfw-optimization-meta-box', 'Need optimization help?', array( &$this, 'optimization_meta_box' ), $this->settings_page_hook, 'side', 'core' );
-        add_meta_box( 'gfw-news-meta-box', 'Latest News', array( &$this, 'news_meta_box' ), $this->settings_page_hook, 'side', 'core' );
-
-        if ( method_exists( $screen, 'add_help_tab' ) ) {
-            $settings_help = '<p>You will need an account at <a href="https://gtmetrix.com/' . GFW_GA_CAMPAIGN . '" target="_blank">Gtmetrix.com</a> to use GTmetrix for WordPress. Registration is free. Once registered, go to the <a href="https://gtmetrix.com/api/' . GFW_GA_CAMPAIGN . '" target="_blank">API page</a> and generate an API key. Enter this key, along with your registered email address, in the authentication fields below, and you\'re ready to go!</p>';
-            $options_help = '<p>You would usually set your <i>default location</i> to the city nearest to your target audience. When you run a test on a page, the report returned will reflect the experience of a user connecting from this location.</p>';
-
-            $test_help = '<p>To analyze the performance of a page or post on your blog, simply enter its URL. You can even just start to type the title into the box, and an autocomplete facility will try and help you out.</p>';
-            $test_help .= '<p>The optional <i>Label</i> is simply used to help you identify a given report in the system.</p>';
-
-            $reports_help = '<p>The Reports section shows summaries of your reports. For even more detailed information, click on the Report\'s URL/label, and the full GTmetrix.com report will open. You can also delete a report.</p>';
-            $reports_help .= '<p><b>Note:</b> deleting a report here only removes it from GTmetrix for WordPress - not from your GTmetrix account.<br /><b>Note:</b> if the URL/label is not a link, this means the report is no longer available on GTmetrix.com.</p>';
-
-            $schedule_help = '<p>You can set up your reports to be generated even when you\'re away. Simply run the report as normal (in Reports), then expand the report\'s listing, and click <i>Monitor page</i>. You will be redirected to this page, where you can choose how often you want this report to run.</p>';
-            $schedule_help .= '<p>You can also choose to be sent an email when certain conditions apply. This email can go to either your admin email address or your GTmetrix email address, as defined in settings.</p>';
-            $schedule_help .= '<p><b>Note:</b> every test will use up 1 of your API credits on GTmetrix.com<br /><b>Note:</b> scheduled pages use the WP-Cron functionality that is built into WordPress. This means that events are only triggered when your site is visited.</p>';
-
-            switch ( $screen->id ) {
-
-                case 'toplevel_page_gfw_settings':
-                case 'gtmetrix_page_gfw_settings':
-                    $screen->add_help_tab(
-                            array(
-                                'title' => 'Authentication',
-                                'id' => 'authentication_help_tab',
-                                'content' => $settings_help
-                            )
-                    );
-                    $screen->add_help_tab(
-                            array(
-                                'title' => 'Options',
-                                'id' => 'options_help_tab',
-                                'content' => $options_help
-                            )
-                    );
-                    break;
-
-                case 'toplevel_page_gfw_tests':
-                    wp_enqueue_style( 'smoothness', GFW_URL . 'lib/smoothness/jquery-ui-1.10.2.custom.min.css', GFW_VERSION );
-                    $screen->add_help_tab(
-                            array(
-                                'title' => 'Test',
-                                'id' => 'test_help_tab',
-                                'content' => $test_help
-                            )
-                    );
-                    $screen->add_help_tab(
-                            array(
-                                'title' => 'Reports',
-                                'id' => 'reports_help_tab',
-                                'content' => $reports_help
-                            )
-                    );
-                    break;
-
-                case 'gtmetrix_page_gfw_schedule':
-                    wp_enqueue_style( 'smoothness', GFW_URL . 'lib/smoothness/jquery-ui-1.10.2.custom.min.css', GFW_VERSION );
-                    wp_enqueue_script( 'flot', GFW_URL . 'lib/flot/jquery.flot.min.js', 'jquery' );
-                    wp_enqueue_script( 'flot.resize', GFW_URL . 'lib/flot/jquery.flot.resize.min.js', 'flot' );
-                    $screen->add_help_tab(
-                            array(
-                                'title' => 'Monitor a page',
-                                'id' => 'schedule_help_tab',
-                                'content' => $schedule_help
-                            )
-                    );
-                    break;
-            }
-
-            $screen->set_help_sidebar( '<p><strong>For more information:</strong></p><p><a href="https://gtmetrix.com/wordpress-optimization-guide.html' . GFW_GA_CAMPAIGN . '" target="_blank">GTmetrix Wordpress Optimization Guide</a></p>' );
         }
     }
 
@@ -661,7 +512,6 @@ HERE;
 
         if ( 'POST' == $_SERVER['REQUEST_METHOD'] ) {
             $data = $_POST;
-            //error_log( 'schedule_page ' . print_r( $data, TRUE));
             if ( $data['report_id'] ) {
 
                 $custom_fields = get_post_custom( $data['report_id'] );
@@ -675,7 +525,6 @@ HERE;
                 update_post_meta( $event_id, 'gfw_url', $custom_fields['gfw_url'][0] );
                 update_post_meta( $event_id, 'gfw_label', $custom_fields['gfw_label'][0] );
                 update_post_meta( $event_id, 'gfw_location', 1 ); // restricted to Vancouver
-                update_post_meta( $event_id, 'gfw_adblock', isset( $custom_fields['gfw_adblock'][0] ) ? $custom_fields['gfw_adblock'][0] : 0  );
                 update_post_meta( $event_id, 'gfw_event_error', 0 );
             }
 
@@ -797,9 +646,6 @@ HERE;
         <div id="gfw-confirm-delete" class="gfw-dialog" title="Delete this report?">
             <p>Are you sure you want to delete this report?</p>
 			<p>Deleted reports are not recoverable.</p>
-        </div>
-        <div id="gfw-video" class="gfw-dialog">
-            <p class="description">To download or embed the video, visit the <a href="#fixme">Video tab on the Detailed Report page.</a></p>
         </div>
         </div>
         <?php
@@ -971,7 +817,6 @@ HERE;
                     );
                     foreach ( $locations['data'] as $location ) {
                         $location_region = $location['attributes']['region'];
-                        //error_log($location_region);
                         if( $status_options['account_pro_locations_access'] ) {
                             //we've got access to all locations. Group them by region
                             $valid['locations'][$location_region][$location['id']] = $location;
@@ -1011,18 +856,13 @@ HERE;
             }
         }
         $options = get_option( 'gfw_options' );
-        //$valid['pro_locations'] = isset( $status['data']['attributes']['account_pro_locations_access'] ) ? $status['data']['attributes']['account_pro_locations_access'] : 0;
-        //$valid['pro_analysis_options'] = isset( $status['data']['attributes']['account_pro_analysis_options_access'] ) ? $status['data']['attributes']['account_pro_analysis_options_access'] : 0;
-        $valid['default_location'] = isset( $input['default_location'] ) ? $input['default_location'] : (isset( $options['default_location'] ) ? $options['default_location'] : 1);
-        $valid['default_adblock'] = isset( $input['default_adblock'] ) ? $input['default_adblock'] : (isset( $options['default_adblock'] ) ? $options['default_adblock'] : 0);
+         $valid['default_location'] = isset( $input['default_location'] ) ? $input['default_location'] : (isset( $options['default_location'] ) ? $options['default_location'] : 1);
         $valid['dashboard_widget'] = isset( $input['dashboard_widget'] ) ? $input['dashboard_widget'] : (isset( $options['dashboard_widget'] ) ? $options['dashboard_widget'] : 1);
-        $valid['toolbar_link'] = isset( $input['toolbar_link'] ) ? $input['toolbar_link'] : (isset( $options['toolbar_link'] ) ? $options['toolbar_link'] : 1);
         $valid['notifications_email'] = isset( $input['notifications_email'] ) ? $input['notifications_email'] : (isset( $options['notifications_email'] ) ? $options['notifications_email'] : 'api_username');
         $valid['report_type'] = isset( $input['report_type'] ) ? $input['report_type'] : (isset( $options['report_type'] ) ? $options['report_type'] : 'lighthouse');
         $valid['default_retention'] = isset( $input['default_retention'] ) ? $input['default_retention'] : (isset( $options['default_retention'] ) ? $options['default_retention'] : '1month');
         $valid['default_connection'] = isset( $input['default_connection'] ) ? $input['default_connection'] : (isset( $options['default_connection'] ) ? $options['default_connection'] : 'unthrottled');
         $valid['default_browser'] = isset( $input['default_browser'] ) ? $input['default_browser'] : (isset( $options['default_browser'] ) ? $options['default_browser'] : 1);
-
         $valid['widget_pagespeed'] = isset( $input['widget_pagespeed'] ) ? $input['widget_pagespeed'] : $options['widget_pagespeed'];
         $valid['widget_yslow'] = isset( $input['widget_yslow'] ) ? $input['widget_yslow'] : $options['widget_yslow'];
         $valid['widget_scores'] = isset( $input['widget_scores'] ) ? $input['widget_scores'] : $options['widget_scores'];
@@ -1087,77 +927,11 @@ HERE;
         }
 
         update_post_meta( $post_id, 'gfw_url', $this->append_http( $data['gfw_url'] ) );
-        //update_post_meta( $post_id, 'gfw_label', $data['gfw_label'] );
-        update_post_meta( $post_id, 'gfw_location', $data['gfw_location'] );
-        update_post_meta( $post_id, 'gfw_connection', $data['gfw_connection'] );
-        update_post_meta( $post_id, 'gfw_browser', $data['gfw_browser'] );
-        update_post_meta( $post_id, 'gfw_adblock', isset( $data['gfw_adblock'] ) ? $data['gfw_adblock'] : 0  );
-        update_post_meta( $post_id, 'gfw_video', isset( $data['gfw_enable_video'] ) ? $data['gfw_enable_video'] : 0  );
+        update_post_meta( $post_id, 'gfw_location', 1 );
+        update_post_meta( $post_id, 'gfw_connection', '20000/5000/25' );
+        update_post_meta( $post_id, 'gfw_browser', 3 );
         update_post_meta( $post_id, 'gfw_event_id', $event_id );
-/*
-                            $conditions = array(
-                                        'Scores' => array(
-                                            'pagespeed_score' => 'PageSpeed score',
-                                            'yslow_score' => 'YSlow score'
-                                        ),
-                                        'Page Timings' => array(
-                                            'fully_loaded_time' => 'Fully Loaded',
-                                            'time_to_first_byte' => 'Time to First Byte',
-                                            'redirect_duration' => 'Redirect Duration',
-                                            'connect_duration' => 'Connect Duration',
-                                            'backend_duration' => 'Backend Duration',
-                                            'onload_time' => 'Onload',
-                                            'onload_duration' => 'Onload Duration',
-                                        ),
-                                        'Page Details' => array(
-                                            'page_bytes' => 'Total Size',
-                                            'page_requests' => 'Total Requests'
-                                        ),
-                                        'Legacy & Other Metrics' => array(
-                                            'html_bytes' => 'HTML Size',
-                                            'first_paint_time' => 'First Paint',
-                                            'dom_interactive_time' => 'DOM Interactive',
-                                            'dom_content_loaded_time' => 'DOM Content Loaded',
-                                            'dom_content_loaded_duration' => 'DOM Content Loaded Duration'
-                                        )
-                                    );
-                                } else {
-                                    $conditions = array(
-                                        'Scores' => array(
-                                            'gtmetrix_grade' => 'GTmetrix Grade',
-                                            'performance_score' => 'Performance Score',
-                                            'structure_score' => 'Structure Score'
-                                        ),
-                                        'Performance Metrics' => array(
-                                            'largest_contentful_paint' => 'Largest Contentful Paint',
-                                            'first_contentful_paint' => 'First Contentful Paint',
-                                            'total_blocking_time' => 'Total Blocking Time',
-                                            'cumulative_layout_shift' => 'Cumulative Layout Shift',
-                                            'time_to_interactive' => 'Time to Interactive',
-                                            'speed_index' => 'Speed Index'
-                                        ),
-                                        'Page Timings' => array(
-                                            'time_to_first_byte' => 'Time to First Byte',
-                                            'redirect_duration' => 'Redirect Duration',
-                                            'connect_duration' => 'Connect Duration',
-                                            'backend_duration' => 'Backend Duration',
-                                            'onload_time' => 'Onload',
-                                            'fully_loaded_time' => 'Fully Loaded'
-                                        ),
-                                        'Page Details' => array(
-                                            'page_bytes' => 'Total Size',
-                                            'page_requests' => 'Total Requests'
-                                        ),
-                                        'Legacy & Other Metrics' => array(
-                                            'html_bytes' => 'HTML Size',
-                                            'first_paint_time' => 'First Paint',
-                                            'dom_interactive_time' => 'DOM Interactive',
-                                            'dom_content_loaded_time' => 'DOM Content Loaded',
-                                            'dom_content_loaded_duration' => 'DOM Content Loaded Duration',
-                                            'onload_duration' => 'Onload Duration'
-                                        )
-                                    );
-                                    */
+
                             
         if ( !isset( $data['error'] ) ) {
             update_post_meta( $post_id, 'gtmetrix_test_id', $data['test_id'] );
@@ -1203,24 +977,20 @@ HERE;
         $api = $this->api();
         $response = array( );
         delete_transient( 'credit_status' );
-        error_log( 'run_test parameters ' . print_r( $parameters, TRUE ) );
         $test_id = $api->test( array(
-            'url' => $this->append_http( $parameters['gfw_url'] ),
-            'browser' => $parameters['gfw_browser'],
-            'location' => $parameters['gfw_location'],
-            'report' => $parameters['gfw_report'],
-            'connection' => $parameters['gfw_connection'],
-            'retention' => $parameters['gfw_retention'],
-            'cookies' => $parameters['gfw_cookies'],
+            'url' => $this->append_http( $parameters['gfw_url'] ) ?? '',
+            'browser' => 3,
+            'location' => 1,
+            'report' => $parameters['gfw_report'] ?? '',
+            'connection' => '20000/5000/25',
+            'retention' => 1,
+            'cookies' => $parameters['gfw_cookies'] ?? '',
             'httpauth_username' => isset( $parameters['gfw_httpauth_username'] ) ? $parameters['gfw_httpauth_username'] : '',
             'httpauth_password' => isset( $parameters['gfw_httpauth_password'] ) ? $parameters['gfw_httpauth_password'] : '',
-            'adblock' => isset( $parameters['gfw_adblock'] ) ? $parameters['gfw_adblock'] : 0,
-            'video' => isset( $parameters['gfw_enable_video'] ) ? $parameters['gfw_enable_video'] : 0,
             )
         );
 
         if ( $api->error() ) {
-            error_log($api->error());
             $response['error'] = $api->error();
             return $response;
         }
@@ -1234,14 +1004,15 @@ HERE;
 
         if ( $api->completed() ) {
             $response['test_id'] = $test_id;
-            error_log( "API RESULTS " . print_r( $api->results(), TRUE ) );
             return array_merge( $response, $api->results() );
         }
+
+		return array();
     }
 
     public function save_report_callback() {
         if ( check_ajax_referer( 'gfwnonce', 'security' ) ) {
-            $fields = array( );
+            $fields = array();
             parse_str( $_POST['fields'], $fields );
             $report = $this->run_test( $fields );
             if ( isset( $report['error'] ) ) {
@@ -1375,9 +1146,6 @@ HERE;
                 echo '<div><a class="button button-secondary" href="' . $custom_fields['report_url'][0] . '" target="_blank"><i class="sprite gfw-report-icon"></i>Detailed report</a></div>';
                 echo '<div><a class="button button-secondary" href="' . $custom_fields['report_url'][0] . '#history"' . ' target="_blank"><i class="sprite gfw-report-icon"></i>View History</a></div>';
                 echo '<div><a class="button button-secondary" href="' . $custom_fields['report_url'][0] . 'pdf' . '"><i class="sprite gfw-pdf-icon"></i>Download PDF</a></div>';
-				if ( isset( $custom_fields['gfw_video'][0] ) && $custom_fields['gfw_video'][0] ) {
-                    echo '<div><a class="button button-secondary video-button" href="' . $custom_fields['report_url'][0] . 'video' . '"><i class="sprite gfw-video-icon"></i>View Video</a></div>';
-                }
             }
             echo '</div>';
             echo '</div>';
@@ -1459,14 +1227,8 @@ HERE;
             $test->user_agent( GFW_USER_AGENT );
             $status = $test->status();
             if ( $test->error() ) {
-                /*
-                if ( !get_settings_errors( 'gfw_options' ) ) {
-                    add_settings_error( 'gfw_options', 'api_error', $test->error() );
-                }
-                */
             } else {
                 $status_options = $status['data']['attributes'];
-                //error_log( "STATUS OPTIONS " . print_r( $status_options, TRUE ));
                 update_option( 'gfw_status', $status_options );              
             }
         }
@@ -1506,27 +1268,6 @@ HERE;
         return $api;
     }
 
-    public function credits_meta_box() {
-        $api = $this->api();
-        $status = get_transient( 'credit_status' );
-        if ( false === $status ) {
-            $status = $api->status();
-            set_transient( 'credit_status', $status, 60 * 2 );
-        }
-        
-        if ( $api->error() ) {
-            $response['error'] = $test->error();
-            return $response;
-        }
-        ?>
-        <p style="font-weight:bold">API Credits Remaining: <?php echo $status['api_credits']; ?></p>
-        <p style="font-style:italic">Next top-up: <?php echo $this->wp_date( $status['api_refill'], true ); ?></p>
-        <p>Every test costs 1 API credit, except tests that use video, which cost 5 credits.</p>
-        <p>You can view your API credit limits and usage in <a href="https://gtmetrix.com/dashboard/account" target="_blank">your Account page</a> on GTmetrix.com</p>
-        <p>If you need more API credits, you can <a href="https://gtmetrix.com/pricing.html" target="_blank">upgrade your plan here</a>.</p>
-        <?php
-    }
-
     public function gtmetrix_account_meta_box() {
         $gfw_status = get_option( 'gfw_status', array() );
         $gfw_options = get_option( 'gfw_options' );
@@ -1557,9 +1298,6 @@ HERE;
             Every test costs <?php echo $gfw_options['report_type'] == 'lighthouse' ? "<strong>1</strong> API credit" : "<strong>0.7</strong> API credits"; ?>
         </p>
         <p>
-            Tests that add video playback cost an additional <strong>0.9</strong> API credits
-        </p>
-        <p>
             Tests with PDF Summary download enabled cost <strong><?php echo ( $test_cost + 0.2 ); ?></strong> API credits (<strong><?php echo ( $test_cost + 0.3 ); ?></strong> API credits for Full Reports)
         </p>
         <p>
@@ -1567,60 +1305,6 @@ HERE;
         </p>
 
         <?php
-    }
-
-    public function optimization_meta_box() {
-        ?>
-        <p>Have a look at our WordPress Optimization Guide <a target="_blank" href="https://gtmetrix.com/wordpress-optimization-guide.html">WordPress Optimization Guide</a>.</p>
-        <p>You can also <a target="_blank" href="https://gtmetrix.com/contact.html?type=optimization-request">contact us</a> for optimization help and we'll put you in the right direction towards a faster website.</p>
-        <?php
-    }
-
-    public function upgrade_meta_box() {
-        ?>
-        <p>
-            Get more API credits, monitoring in global locations and more with GTmetrix PRO
-        </p>
-        <p>
-            <a href="https://gtmetrix.com/why-gtmetrix-pro.html" target="_blank">More reasons to upgrade</a>
-        </p>
-        <p>
-            <a href="https://gtmetrix.com/pricing.html" target="_blank">Upgrade to GTmetrix PRO</a>
-        </p>
-        <?php
-    }
-
-    public function api_meta_box() {
-        ?>
-        <p>
-            <strong>This plugin is using v0.1 of our API</strong> GTmetrix API v0.1 only provides Legacy Report data (PageSpeed/YSlow scores).
-        </p><p>
-            We are currently working on v2.0 which will allow for Lighthouse metrics (Web Vitals) to be retrieved. Our plugin will be updated soon to reflect our new Lighthouse testing methodology.
-        </p>
-        <?php
-    }
-
-    public function news_meta_box() {
-        $latest_news = get_transient( 'latest_news' );
-        if ( false === $latest_news ) {
-            $feed = wp_remote_get( 'https://gtmetrix.com/news.xml' );
-            if ( 200 == wp_remote_retrieve_response_code( $feed ) ) {
-                $xml = simplexml_load_string( $feed['body'] );
-                $latest_news = '';
-                if ( $xml != '' ) {
-                    for ( $i = 0; $i < 5; $i++ ) {
-                        $item = $xml->channel->item[$i];
-                        $latest_news .= '<p>' . $item->description . '</a><br /><span class="description">' . $this->wp_date( $item->pubDate, true ) . '</span></p>';
-                    }
-                }
-                set_transient( 'latest_news', '<!-- Updated ' . date( 'r' ) . ' -->' . $latest_news, 60 * 2 );
-            } else {
-                echo '<p>Sorry, feed temporarily unavailable</p>';
-            }
-        }
-        echo $latest_news;
-        echo '<p><a href="https://twitter.com/gtmetrix" target="_blank" class="button-secondary">Follow us on Twitter</a></p>';
-        echo '<p><a href="https://facebook.com/gtmetrix/" target="_blank" class="button-secondary">Follow us on Facebook</a></p>';
     }
 
     protected function front_score( $dashboard = false ) {
@@ -1665,7 +1349,6 @@ HERE;
             while ( $query->have_posts() ) {
                 $query->next_post();
                 $custom_fields = get_post_custom( $query->post->ID );
-                //error_log( print_r($custom_fields, TRUE));
                 $expired = true;
                 if ( $this->gtmetrix_file_exists( $custom_fields['report_url'][0] . '/screenshot.jpg' ) ) {
                     $expired = false;
@@ -1674,10 +1357,6 @@ HERE;
 
                 
                 if ( !$dashboard && !$expired ) {
-                    //echo '<div class="gfw-latest-report-wrapper">';
-                    //echo '';
-                    //echo '';
-                    //echo '</div>';
                 ?>
                 <?php if( isset( $custom_fields['pagespeed_score'][0] ) ) {
                     $pagespeed_grade = $this->score_to_grade( $custom_fields['pagespeed_score'][0] );
@@ -1864,11 +1543,7 @@ HERE;
         <form method="post" id="gfw-retest">
 			<input type="hidden" name="post_type" value="gfw_report" />
 			<input type="hidden" name="gfw_url" value="<?php echo $url; ?>" />
-			<input type="hidden" name="gfw_location" value="<?php echo $location; ?>" />
 			<input type="hidden" name="gfw_report" value="<?php echo $report_type;?>" />
-			<input type="hidden" name="gfw_browser" value="<?php echo $browser; ?>" />
-			<input type="hidden" name="gfw_connection" value="<?php echo $connection; ?>" />
-			<input type="hidden" name="gfw_retention" value="<?php echo $retention; ?>" />
 			<?php
             wp_nonce_field( plugin_basename( __FILE__ ), 'gfwtestnonce' );?>
 			<?php submit_button( $label, 'primary', 'submit', false ); ?>
@@ -1903,68 +1578,10 @@ HERE;
                 <span class="gfw-placeholder-alternative description">You can enter a URL (eg. http://yourdomain.com), or start typing the title of your page/post</span>  <?php submit_button( 'Analyze', 'primary', 'submit', false ); ?>
 			  </div>
 		    </div>
-            <table class="form-table">
-                <tr valign="top">
-                    <th scope="row">Browser<a class="sprite gfw-help-icon tooltip" href="#" title=""></a></th>
-                    <td><select name="gfw_browser" id="gfw_browser">
-                            <?php
-                            foreach ( $options['browsers'] as $browser ) {
-                                echo '<option value="' . $browser['id'] . '" ' . selected( isset( $options['default_browser'] ) ? $options['default_browser'] : $browser['default'], $browser['id'], false ) . '>' . $browser['attributes']['name'] . '</option>';
-                            }
-                            ?>
-                        </select><br />
-                        <span class="description">Test Browser</span></td>
-                </tr><tr valign="top">
-                    <th scope="row">Location<a class="sprite gfw-help-icon tooltip" href="#" title="f"></a></th>
-                    <td><select name="gfw_location" id="gfw_location">
-                            <?php
-                            foreach ( $options['locations'] as $location_region => $region_locations ) {
-                                if( !empty( $region_locations ) ) {
-                                    echo '<optgroup label="' . $location_region . '">';
-                                    //ALL locations are grouped by region.
-                                    foreach( $region_locations as $location ) {
-                                        echo '<option value="' . $location['id'] . '" ' . selected( $options['default_location'], $location['id'], false );
-                                        if( $location['attributes']['account_has_access'] != 1 ) {
-                                            echo ' disabled';
-                                        }
-                                        echo '>' . $location['attributes']['name'] .  '</option>';
-                                    }
-                                    echo '</optgroup>';
-                                }
-                            }
-                            //foreach ( $options['locations'] as $location ) {
-                            //    echo '<option value="' . $location['id'] . '" ' . selected( isset( $options['default_location'] ) ? $options['default_location'] : $location['default'], $location['id'], false ) . '>' . $location['attributes']['name'] . '</option>';
-                            //}
-                            ?>
-                        </select><br />
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Connection<a class="sprite gfw-help-icon tooltip" href="#" title="Analyze the performance of the page from one of our several test regions.  Your PageSpeed and YSlow scores usually stay roughly the same, but Page Load times and Waterfall should be different. Use this to see how latency affects your page load times from different parts of the world."></a></th>
-                    <td><select name="gfw_connection" id="gfw_connection">
-                            <?php
-                            foreach ( $options['connections'] as $connection ) {
-                                echo '<option value="' . $connection['id'] . '" ' . selected( isset( $options['default_connection'] ) ? $options['default_connection'] : $connection['default'], $connection['id'], false ) . '>' . $connection['attributes']['name'] . '</option>';
-                            }
-                            ?>
-                        </select><br />
-                </tr>
-            </table>
             <div id="analysis-options-wrapper">
                 <h3 id="analysis-options-header"><i class="sprite down-arrow"></i> Show Analysis Options</h3>
                 <div id="analysis-options">
-                    <table class="form-table">
-                        <tr valign="top">
-                        <th scope="row">Enable Adblock Plus<a class="sprite gfw-help-icon tooltip" href="#" title=""></a></th>
-                        <td><span class="input-toggle">
-                            <input type="checkbox" name="gfw_enable_adblock" id="gfw_enable_adblock" value="1" /><label for="gfw_enable_adblock"></label></span> <span class="description">Block ads from loading on your site</span><br />
-                            </td>
-                        </tr>
-                        <tr valign="top">
-                        <th scope="row">Enable Video<a class="sprite gfw-help-icon tooltip" href="#" title=""></a></th>
-                        <td><span class="input-toggle">
-                            <input type="checkbox" name="gfw_enable_video" id="gfw_enable_video" value="1" /><label for="gfw_enable_video"></label></span> <span class="description">Generate a video of your page load (+X API credits per test)</span><br />
-                            </td>
-                        </tr>
+                    <table class="form-table">                        
                         <tr valign="top">
                         <th scope="row">Cookies<a class="sprite gfw-help-icon tooltip" href="#" title=""></a></th>
                         <td><textarea id="gfw_cookies" name="gfw_cookies"></textarea>
@@ -1982,16 +1599,6 @@ HERE;
 								<input type="text" id="gfw_httpauth_password" name="gfw_httpauth_password" />
 							</div>
                             </td>
-                        </tr>
-                        <tr valign="top">
-                            <th scope="row">Data Retention<a class="sprite gfw-help-icon tooltip" href="#" title="Data retention"></a></th>
-                            <td><select name="gfw_retention" id="gfw_retention">
-                                    <?php
-                                    foreach ( $options['retentions'] as $retention ) {
-                                        echo '<option value="' . $retention['id'] . '" ' . selected( isset( $options['default_retention'] ) ? $options['default_retention'] : $retention['default'], $retention['id'], false ) . '>' . $retention['attributes']['name'] . '</option>';
-                                    }
-                                    ?>
-                                </select></td>
                         </tr>
                     </table>
                 </div>
@@ -2036,37 +1643,6 @@ HERE;
                             ?>
                         </select><br />
                         <span class="description">Note: every report will use up 1 of your API credits on GTmetrix.com</span></td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row"><label for="gfw-location">Browser</label></th>
-                    <td><?php echo $options['browsers'][$custom_fields['gfw_browser'][0]]['attributes']['name']; ?></td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row"><label for="gfw-location">Location</label></th>
-                    <td><?php 
-                    foreach( $options['locations'] as $region => $region_locations ) {
-                        $location_in_region = array_search( $custom_fields['gfw_location'][0], array_keys( $region_locations ) );
-                        if( $location_in_region !== FALSE ) {
-                            echo $region_locations[$custom_fields['gfw_location'][0]]['attributes']['name'];
-                            break;
-                        }
-                    } ?></td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row"><label for="gfw-location">Connection</label></th>
-                    <td><?php 
-                    //echo print_r( $options['connections'], true);
-                    foreach( $options['connections'] as $connection ) {
-                        if( $connection['id'] == $custom_fields['gfw_connection'][0] ) {
-                            echo $connection['attributes']['name'];
-                        }
-                    } 
-                    ?>
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row"><label for="gfw-location">Adblock Plus</label></th>
-                    <td><?php echo $custom_fields['gfw_adblock'][0] ? 'On' : 'Off'; ?></td>
                 </tr>
                 <?php
                 //echo  print_r( $custom_fields['gfw_notifications'], TRUE ) ;
@@ -2413,7 +1989,6 @@ HERE;
                             foreach ( $custom_fields as $name => $value ) {
                                 $$name = $value[0];
                             }
-                            //error_log( print_r( $custom_fields, TRUE ));
                             if ( !isset( $gtmetrix_error ) ) {
                                 if( isset( $performance_score )) {
                                     $performance_grade = $this->score_to_grade( $performance_score );
@@ -2438,10 +2013,6 @@ HERE;
                                 echo '<td data-th="Date">' . $report_date . '</td>';
                             } else {
                                 echo '<td data-th="URL" title="Click to expand/collapse" class="gfw-reports-url gfw-toggle tooltip">' . $title . '</td>';
-                                echo '<td data-th="Options" class="gfw-toggle"> <span class="sprite gfw-browser-icon-small gfw-browser-icon-' . $gfw_browser . '"></span> <span class="sprite gfw-location-icon-small gfw-location-icon-' . $gfw_location . '"></span>';
-                                if( $gfw_video ) {
-                                    echo '<span class="sprite gfw-video-icon-small"></span>';
-                                }
                                 echo '<a href="' . GFW_SCHEDULE . '&report_id=' . $query->post->ID . '" class="sprite gfw-schedule-icon-small tooltip" title="Monitor page">Monitor page</a></td>';
                                 if( $options['report_type'] == "lighthouse" ) {
                                     echo '<td data-th="Grade" class="gfw-toggle">';
@@ -2595,14 +2166,14 @@ HERE;
 
         protected function translate_message( $message ) {
             if ( 0 === stripos( $message, 'Maximum number of API calls reached.' ) ) {
-                $message .= ' or <a href="https://gtmetrix.com/pro/' . GFW_GA_CAMPAIGN . '" target="_blank" title="Go Pro">go Pro</a> to receive bigger daily top-ups and other benefits.';
+                $message .= ' or <a href="https://gtmetrix.com/pro/" target="_blank" title="Go Pro">go Pro</a> to receive bigger daily top-ups and other benefits.';
             }
             return $message;
         }
 
         public function authenticate_meta_box() {
             if ( !GFW_AUTHORIZED ) {
-                echo '<p style="font-weight:bold">You must have an API key to use this plugin.</p><p>To get an API key, register for a FREE account at gtmetrix.com and generate one in the API section.</p><p><a href="https://gtmetrix.com/api/' . GFW_GA_CAMPAIGN . '" target="_blank">Register for a GTmetrix account now &raquo;</a></p>';
+                echo '<p style="font-weight:bold">You must have an API key to use this plugin.</p><p>To get an API key, register for a FREE account at gtmetrix.com and generate one in the API section.</p><p><a href="https://gtmetrix.com/api" target="_blank">Register for a GTmetrix account now &raquo;</a></p>';
             }
             echo '<table class="form-table">';
             do_settings_fields( 'gfw_settings', 'authentication_section' );
